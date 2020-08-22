@@ -36,7 +36,9 @@ def register_user(name, username, password):
         name=name,
         username=username,
         password=password,
-        editHistory={}
+        editHistory={},
+        followingList = [],
+        followerList = []
     ).save()
     user_obj = makeSerializable(user.to_son().to_dict())
     return user_obj
@@ -81,10 +83,14 @@ def get_user_profile(username):
         return None
     else:
         user_res = user_search_res.first()
+        following_list = []
+        follower_list = []
         return {
             "id": user_res.id,
             "username": user_res.username,
-            "name": user_res.name          
+            "name": user_res.name,
+            "followingList": user_res.followingList,
+            "followerList": follower_list
         }        
 
 def get_edit_history(username, dayCount):
@@ -130,6 +136,8 @@ def get_activity(username, dayCount):
     return activity
 
 def follow_user(user, followUsername):
+    if (followUsername == user.data['username']):
+        return "You cannot follow yourself", 400
     user_search_res = userModel.User.objects.raw({'username': user.data['username']})
     user_follow_search_res = userModel.User.objects.raw({'username': followUsername})   
     if (user_follow_search_res.count() == 0):
@@ -137,12 +145,18 @@ def follow_user(user, followUsername):
     if (user_search_res.count() == 0):
         return "User not found.", 400
     user = user_search_res.first()
-    if (user_follow_search_res.first() not in user.followingList):
-        user.followingList.append(user_follow_search_res.first().id)
+    user_follow = user_follow_search_res.first()
+    if (user_follow not in user.followingList):
+        user.followingList.append(user_follow.id)
         user.save()
+    if (user not in user_follow.followerList):
+        user_follow.followerList.append(user.id)
+        user_follow.save()
     return makeSerializable(user.to_son().to_dict())
 
 def unfollow_user(user, unfollowUsername):
+    if (unfollowUsername == user.data['username']):
+        return "You cannot unfollow yourself", 400
     user_search_res = userModel.User.objects.raw({'username': user.data['username']})
     user_unfollow_search_res = userModel.User.objects.raw({'username': unfollowUsername})   
     if (user_unfollow_search_res.count() == 0):
@@ -150,7 +164,11 @@ def unfollow_user(user, unfollowUsername):
     if (user_search_res.count() == 0):
         return "User not found.", 400
     user = user_search_res.first()
-    if (user_unfollow_search_res.first() in user.followingList):
-        user.followingList.remove(user_unfollow_search_res.first())
+    user_unfollow = user_unfollow_search_res.first()
+    if (user_unfollow in user.followingList):
+        user.followingList.remove(user_unfollow)
         user.save()
+    if (user in user_unfollow.followerList):
+        user_unfollow.followerList.remove(user)
+        user_unfollow.save()
     return makeSerializable(user.to_son().to_dict())

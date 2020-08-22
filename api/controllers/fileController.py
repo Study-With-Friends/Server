@@ -40,7 +40,8 @@ def get_user_file_list(userId):
     for file in query_set:
         file_list.append({
             "displayName": file.displayName,
-            "name": file.name
+            "name": file.name,
+            "lastModified": str(file.lastModified)
         })
     return file_list
 

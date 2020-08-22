@@ -10,5 +10,5 @@ class User(MongoModel):
     username = fields.CharField(required=True)
     school = fields.CharField()
     location = fields.CharField()
-    followingList = fields.ListField(field=fields.ReferenceField(model='User'), blank=True)
-    followerList = fields.ListField(field=fields.ReferenceField(model='User'), blank=True)
+    followingList = fields.ListField(field=fields.ReferenceField(model='User'), blank=True, default=[], required=True)
+    followerList = fields.ListField(field=fields.ReferenceField(model='User'), blank=True, default=[], required=True)
