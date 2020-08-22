@@ -51,7 +51,16 @@ class CurUserLogout(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
-        return userController.get_user_profile(**parser.parse_args())
+        parser.add_argument('dayCount', type=int, required=True)
+        args = parser.parse_args()
+        profile = userController.get_user_profile(args['username'])
+        history = userController.get_edit_history(args['username'], args['dayCount'])
+        file_list = fileController.get_user_file_list(profile['id'])
+        return {
+            "profile": profile,
+            "file_list": file_list,
+            "history": history
+        }
 
 
 @api.route('/user/history')
@@ -60,8 +69,15 @@ class CurUserLogout(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('userId', type=str, required=True)
-        parser.add_argument('dayCount', type=int, required=True)        
-        return userController.get_edit_history(**parser.parse_args())
+        return 
+
+@api.route('/files/list')
+class FileUpload(Resource):
+    @flask_login.login_required
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('userId', type=str, required=True)        
+        return 
 
 @api.route('/users')
 class AllUsers(Resource):
@@ -96,11 +112,3 @@ class FileUpload(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('fileName', type=str, required=True)        
         return fileController.get_file(**parser.parse_args())
-
-@api.route('/files/list')
-class FileUpload(Resource):
-    @flask_login.login_required
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('userId', type=str, required=True)        
-        return fileController.get_user_file_list(**parser.parse_args())

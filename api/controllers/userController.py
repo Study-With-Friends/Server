@@ -85,8 +85,8 @@ def get_user_profile(username):
         }        
 
 
-def get_edit_history(userId, dayCount):
-    user_search_res = userModel.User.objects.raw({'_id': userId})
+def get_edit_history(username, dayCount):
+    user_search_res = userModel.User.objects.raw({'username': username})
     editHistory = {}
     if (user_search_res.count() > 0):
         user = user_search_res.first()
