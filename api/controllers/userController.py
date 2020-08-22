@@ -4,6 +4,7 @@ import shortuuid
 from api.models import userModel
 from api.utils.api import makeSerializable
 from datetime import datetime, timedelta
+from random import randint
 
 login_manager = flask_login.LoginManager()
 
@@ -33,6 +34,7 @@ def register_user(name, username, password, school, location):
     user_id = shortuuid.uuid()
     user = userModel.User(
         id=user_id,
+        avatar="https://picsum.photos/id/" + str(randint(0, 500)) + "/300/300",
         name=name,
         username=username,
         password=password,
@@ -86,14 +88,14 @@ def get_user_profile(username):
     else:
         user_res = user_search_res.first()
         following_list = list(map(lambda user: {
-            "id": user.id,
-            "username": user.username,
-            "name": user.name
+            "id": user.id if user else '',
+            "username": user.username if user else '',
+            "name": user.name if user else ''
         }, user_res.followingList))
         follower_list = list(map(lambda user: {
-            "id": user.id,
-            "username": user.username,
-            "name": user.name
+            "id": user.id if user else '',
+            "username": user.username if user else '',
+            "name": user.name if user else ''
         }, user_res.followerList))
         return {
             "id": user_res.id,
@@ -102,7 +104,8 @@ def get_user_profile(username):
             "followingList": following_list,
             "followerList": follower_list,
             "location": user_res.location,
-            "school": user_res.school
+            "school": user_res.school,
+            "avatar": user_res.avatar
         }        
 
 def get_edit_history(username, dayCount):
@@ -139,6 +142,7 @@ def get_activity(username, dayCount):
                         fileData = fileController.get_file_data(file)                    
                         activity[dateStr].append({
                             "username": user.username,
+                            "avatar": user.avatar,
                             "fileName": file,
                             "fileDisplayName": fileData['displayName'] if fileData is not None else '',
                             "edits": user.editHistory[dateStr][file],
