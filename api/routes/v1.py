@@ -34,7 +34,9 @@ class CurUserLogin(Resource):
             flask_login.login_user(user_res[0],
                                    remember=True,
                                    duration=timedelta(days=30))
-        return user_res[1]
+        else:
+            return "Invalid username or password", 403
+        return user_res[1], 200
 
 @api.route('/curuser/logout')
 class CurUserLogout(Resource):
