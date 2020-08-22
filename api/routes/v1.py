@@ -77,7 +77,7 @@ class FileUpload(Resource):
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         parser.add_argument('fileId', type=str, required=True)
-        parser.add_argument('file', location='files', type=FileStorage, required=True)
+        parser.add_argument('file', location='files', type=FileStorage)
         args = parser.parse_args()
         print(args['username'])
         print(args['password'])

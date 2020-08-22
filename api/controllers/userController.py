@@ -67,7 +67,7 @@ def add_edit(userId):
     if (user_search_res.count() > 0):
         today = datetime.today().strftime('%Y-%m-%d')
         user = user_search_res.first()
-        if (today not in user_search_res.editHistory):
+        if (today not in user.editHistory):
             user.editHistory[today] = 0
         user.editHistory[today] += 1
         user.save()
