@@ -30,9 +30,6 @@ def register_user(name, username, password):
     if (user_search_res.count() != 0):
         return "A user with that username already exists.", 400
     user_id = shortuuid.uuid()
-    print(name)
-    print(username)
-    print(password)
     user = userModel.User(
         id=user_id,
         name=name,
@@ -66,6 +63,19 @@ def add_edit(userId):
             user.editHistory[today] = 0
         user.editHistory[today] += 1
         user.save()
+
+def get_user_profile(userId):
+    user_search_res = userModel.User.objects.raw({'_id': userId})
+    if (user_search_res.count() == 0):
+        return None
+    else:
+        user_res = user_search_res.first()
+        return {
+            "id": user_res.id,
+            "username": user_res.username,
+            "name": user_res.name          
+        }        
+
 
 def get_edit_history(userId, dayCount):
     user_search_res = userModel.User.objects.raw({'_id': userId})
