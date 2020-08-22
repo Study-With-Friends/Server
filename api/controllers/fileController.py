@@ -34,7 +34,7 @@ def upload_file(user, fileId, fileObj):
     return file_res
 
 def get_user_file_list(userId):
-    file_search_res = fileModel.File.objects.raw({'owner': userId})
+    file_search_res = fileModel.File.objects.raw({'owner': userId})    
     query_set = list(file_search_res)
     file_list = []
     for file in query_set:

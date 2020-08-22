@@ -83,13 +83,21 @@ def get_user_profile(username):
         return None
     else:
         user_res = user_search_res.first()
-        following_list = []
-        follower_list = []
+        following_list = list(map(lambda user: {
+            "id": user.id,
+            "username": user.username,
+            "name": user.name
+        }, user_res.followingList))
+        follower_list = list(map(lambda user: {
+            "id": user.id,
+            "username": user.username,
+            "name": user.name
+        }, user_res.followerList))
         return {
             "id": user_res.id,
             "username": user_res.username,
             "name": user_res.name,
-            "followingList": user_res.followingList,
+            "followingList": following_list,
             "followerList": follower_list
         }        
 
