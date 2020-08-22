@@ -129,9 +129,27 @@ def get_activity(username, dayCount):
     return activity
 
 def follow_user(user, followUsername):
-    user_search_res = userModel.User.objects.raw({'username': user['username']})
-    user_follow_search_res = userModel.User.objects.raw({'username': followUsername})    
+    user_search_res = userModel.User.objects.raw({'username': user.data['username']})
+    user_follow_search_res = userModel.User.objects.raw({'username': followUsername})   
+    if (user_follow_search_res.count() == 0):
+        return "Follow User not found.", 400
+    if (user_search_res.count() == 0):
+        return "User not found.", 400
+    user = user_search_res.first()
+    if (user_follow_search_res.first() not in user.followingList):
+        user.followingList.append(user_follow_search_res.first().id)
+        user.save()
+    return makeSerializable(user.to_son().to_dict())
 
 def unfollow_user(user, unfollowUsername):
-    user_search_res = userModel.User.objects.raw({'username': user['username']})
-    user_unfollow_search_res = userModel.User.objects.raw({'username': unfollowUsername})    
+    user_search_res = userModel.User.objects.raw({'username': user.data['username']})
+    user_unfollow_search_res = userModel.User.objects.raw({'username': unfollowUsername})   
+    if (user_unfollow_search_res.count() == 0):
+        return "Unfollow User not found.", 400
+    if (user_search_res.count() == 0):
+        return "User not found.", 400
+    user = user_search_res.first()
+    if (user_unfollow_search_res.first() in user.followingList):
+        user.followingList.remove(user_unfollow_search_res.first())
+        user.save()
+    return makeSerializable(user.to_son().to_dict())
