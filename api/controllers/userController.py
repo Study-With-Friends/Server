@@ -34,7 +34,7 @@ def register_user(name, username, password, school, location):
     user_id = shortuuid.uuid()
     user = userModel.User(
         id=user_id,
-        avatar="https://picsum.photos/id/" + str(randint(0, 500)) + "/300/300",
+        avatar="https://picsum.photos/id/" + str(randint(0, 100)) + "/300/300",
         name=name,
         username=username,
         password=password,
