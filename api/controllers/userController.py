@@ -118,6 +118,7 @@ def get_activity(username, dayCount):
                 for file in user.editHistory[dateStr]:
                     fileData = fileController.get_file_data(file)                    
                     activity[dateStr].append({
+                        "username": user.username,
                         "fileName": file,
                         "fileDisplayName": fileData['displayName'] if fileData is not None else '',
                         "edits": user.editHistory[dateStr][file],
