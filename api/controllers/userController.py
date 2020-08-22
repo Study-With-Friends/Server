@@ -132,8 +132,9 @@ def get_activity(username, dayCount):
             curDate = datetime.today()
             for i in range(dayCount):
                 dateStr = curDate.strftime('%Y-%m-%d')                        
-                if (dateStr in user.editHistory):
+                if (dateStr not in activity):
                     activity[dateStr] = []
+                if (dateStr in user.editHistory):                    
                     for file in user.editHistory[dateStr]:
                         fileData = fileController.get_file_data(file)                    
                         activity[dateStr].append({
@@ -142,9 +143,7 @@ def get_activity(username, dayCount):
                             "fileDisplayName": fileData['displayName'] if fileData is not None else '',
                             "edits": user.editHistory[dateStr][file],
                             "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr if fileData is not None else ''
-                        })
-                else:
-                    activity[dateStr] = []
+                        })            
                 curDate = curDate - timedelta(days=1)            
     return activity
 
