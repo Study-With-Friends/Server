@@ -37,7 +37,8 @@ def register_user(name, username, password):
         id=user_id,
         name=name,
         username=username,
-        password=password
+        password=password,
+        editHistory={}
     ).save()
     user_obj = makeSerializable(user.to_son().to_dict())
     return user_obj
