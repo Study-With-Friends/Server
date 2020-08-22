@@ -54,10 +54,12 @@ class CurUserLogout(Resource):
         args = parser.parse_args()
         profile = userController.get_user_profile(args['username'])
         history = userController.get_edit_history(args['username'], args['dayCount'])
+        activity = userController.get_activity(args['username'], args['dayCount'])
         file_list = fileController.get_user_file_list(profile['id'])
         return {
             "profile": profile,
             "file_list": file_list,
+            "activity": activity,
             "history": history
         }
 

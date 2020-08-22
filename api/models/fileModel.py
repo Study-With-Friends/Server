@@ -7,3 +7,4 @@ class File(MongoModel):
     name = fields.CharField(required=True)
     owner = fields.ReferenceField(required=True, model=userModel.User)
     lastModified = fields.DateTimeField(required=True)
+    creationDate = fields.DateTimeField(required=True)

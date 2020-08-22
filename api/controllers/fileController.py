@@ -9,9 +9,11 @@ from api.utils.api import makeSerializable
 
 def upload_file(user, fileId, fileObj):
     file_res = None
+    if (fileId is None):
+        fileId = "__TEST_ID__"
+    fileName = user['id'] + '-' + fileId
     if (fileObj is not None):
-        displayName = secure_filename(fileObj.filename)
-        fileName = user['id'] + '-' + fileId
+        displayName = secure_filename(fileObj.filename)        
         file_search_res = fileModel.File.objects.raw({'name': fileName})
         if (file_search_res.count() == 0):
             file = fileModel.File(
@@ -19,7 +21,8 @@ def upload_file(user, fileId, fileObj):
                 name=fileName,
                 owner=user['id'],
                 lastModified=datetime.now(),
-                displayName=displayName
+                displayName=displayName,
+                creationDate=datetime.now()
             ).save()
         else:
             file = file_search_res.first()
@@ -27,7 +30,7 @@ def upload_file(user, fileId, fileObj):
             file.save()
         file_res = makeSerializable(file_search_res.first().to_son().to_dict())
         fileObj.save(os.path.join(UPLOAD_FOLDER, fileName))
-    userController.add_edit(user['id'])
+    userController.add_edit(user['id'], fileName)
     return file_res
 
 def get_user_file_list(userId):
@@ -40,6 +43,13 @@ def get_user_file_list(userId):
             "name": file.name
         })
     return file_list
+
+def get_file_data(fileName):
+    file_search_res = fileModel.File.objects.raw({'name': fileName})
+    if (file_search_res.count() == 0):
+        return None
+    else:
+        return makeSerializable(file_search_res.first().to_son().to_dict())
 
 def get_file(fileName):
     try:

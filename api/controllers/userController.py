@@ -1,3 +1,4 @@
+from api.controllers import fileController
 import flask_login
 import shortuuid
 from api.models import userModel
@@ -62,14 +63,16 @@ def get_all_users():
         users.append(makeSerializable(user.to_son().to_dict()))
     return users, 200
 
-def add_edit(userId):
+def add_edit(userId, fileName):
     user_search_res = userModel.User.objects.raw({'_id': userId})
     if (user_search_res.count() > 0):
         today = datetime.today().strftime('%Y-%m-%d')
         user = user_search_res.first()
         if (today not in user.editHistory):
-            user.editHistory[today] = 0
-        user.editHistory[today] += 1
+            user.editHistory[today] = {}
+        if (fileName not in user.editHistory[today]):
+            user.editHistory[today][fileName] = 0
+        user.editHistory[today][fileName] += 1
         user.save()
 
 def get_user_profile(username):
@@ -84,7 +87,6 @@ def get_user_profile(username):
             "name": user_res.name          
         }        
 
-
 def get_edit_history(username, dayCount):
     user_search_res = userModel.User.objects.raw({'username': username})
     editHistory = {}
@@ -94,10 +96,31 @@ def get_edit_history(username, dayCount):
         for i in range(dayCount):
             dateStr = curDate.strftime('%Y-%m-%d')                        
             if (dateStr in user.editHistory):
-                editHistory[dateStr] = user.editHistory[dateStr]
+                editHistory[dateStr] = sum(user.editHistory[dateStr].values())
             else:
                 editHistory[dateStr] = 0
             curDate = curDate - timedelta(days=1)            
     return editHistory
 
-
+def get_activity(username, dayCount):
+    user_search_res = userModel.User.objects.raw({'username': username})
+    activity = {}
+    if (user_search_res.count() > 0):
+        user = user_search_res.first()
+        curDate = datetime.today()
+        for i in range(dayCount):
+            dateStr = curDate.strftime('%Y-%m-%d')                        
+            if (dateStr in user.editHistory):
+                activity[dateStr] = []
+                for file in user.editHistory[dateStr]:
+                    fileData = fileController.get_file_data(file)                    
+                    activity[dateStr].append({
+                        "fileName": file,
+                        "fileDisplayName": fileData['displayName'],
+                        "edits": user.editHistory[dateStr][file],
+                        "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr
+                    })
+            else:
+                activity[dateStr] = []
+            curDate = curDate - timedelta(days=1)            
+    return activity
