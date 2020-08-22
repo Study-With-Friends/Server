@@ -23,13 +23,13 @@ def upload_file(user, fileId, fileObj):
                 lastModified=datetime.now(),
                 displayName=displayName,
                 creationDate=datetime.now()
-            ).save()
+            )
         else:
             file = file_search_res.first()
             file.lastModified = datetime.now()
             file.name=fileName,
-            file.save()
-        file_res = makeSerializable(file_search_res.first().to_son().to_dict())
+        file.save()
+        file_res = makeSerializable(file.to_son().to_dict())
         fileObj.save(os.path.join(UPLOAD_FOLDER, fileName))
     userController.add_edit(user['id'], fileName)
     return file_res

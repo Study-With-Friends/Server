@@ -27,6 +27,10 @@ CORS(app,
          r'/*': {
              'origins': [                
                  'http://localhost:3000',
+                 'http://www.studynotes.space',
+                 'https://www.studynotes.space',
+                 'http://studynotes.space',
+                 'https://studynotes.space',
              ]
          }
      },
