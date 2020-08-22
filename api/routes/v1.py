@@ -47,7 +47,6 @@ class CurUserLogout(Resource):
 
 @api.route('/user/profile')
 class CurUserLogout(Resource):
-    @flask_login.login_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
