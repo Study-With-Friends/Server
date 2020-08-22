@@ -54,6 +54,14 @@ def validate_user(username, password):
             return user, makeSerializable(user_res.to_son().to_dict())
         return None, None
 
+def get_all_users():
+    users = []
+    users_search_res = userModel.User.objects.objects.raw({})
+    query_set = list(users_search_res)
+    for user in query_set:
+        users.append(makeSerializable(user.to_son().to_dict()))
+    return users, 200
+
 def add_edit(userId):
     user_search_res = userModel.User.objects.raw({'_id': userId})
     if (user_search_res.count() > 0):
