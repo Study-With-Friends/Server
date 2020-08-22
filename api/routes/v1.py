@@ -63,6 +63,13 @@ class CurUserLogout(Resource):
             "history": history
         }
 
+@api.route('/activity')
+class Activity(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('dayCount', type=int, required=True)
+        args = parser.parse_args()
+        return userController.get_activity(None, args['dayCount'])
 
 @api.route('/user/profile')
 class CurUserLogout(Resource):
