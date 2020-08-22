@@ -5,3 +5,4 @@ class User(MongoModel):
     name = fields.CharField(required=True)
     email = fields.EmailField(required=True)
     password = fields.CharField(required=True)
+    editHistory = fields.DictField(required=True, default={}, blank=True)

@@ -1,3 +1,4 @@
+from api.controllers import userController
 from datetime import datetime
 import os
 import shortuuid
@@ -22,6 +23,7 @@ def upload_file(user, fileId, fileObj):
         file = file_search_res.first()
         file.lastModified = datetime.now()
         file.save()
+    userController.add_edit(user['id'])
     file_res = makeSerializable(file_search_res.first().to_son().to_dict())
     fileObj.save(os.path.join(UPLOAD_FOLDER, fileName))
     return file_res
@@ -31,7 +33,10 @@ def get_user_file_list(userId):
     query_set = list(file_search_res)
     file_list = []
     for file in query_set:
-        file_list.append(file.name)
+        file_list.append({
+            "displayName": file.displayName,
+            "name": file.name
+        })
     return file_list
 
 def get_file(fileName):

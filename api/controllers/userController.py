@@ -2,6 +2,7 @@ import flask_login
 import shortuuid
 from api.models import userModel
 from api.utils.api import makeSerializable
+from datetime import datetime, timedelta
 
 login_manager = flask_login.LoginManager()
 
@@ -36,7 +37,8 @@ def register_user(name, email, password):
         id=user_id,
         name=name,
         email=email,
-        password=password
+        password=password,
+        editHistory={}
     ).save()
     user_obj = makeSerializable(user.to_son().to_dict())
     return user_obj
@@ -54,3 +56,30 @@ def validate_user(email, password):
             user.id = user_res.id          
             return user, makeSerializable(user_res.to_son().to_dict())
         return None, None
+
+def add_edit(userId):
+    user_search_res = userModel.User.objects.raw({'_id': userId})
+    if (user_search_res.count() > 0):
+        today = datetime.today().strftime('%Y-%m-%d')
+        user = user_search_res.first()
+        if (today not in user_search_res.editHistory):
+            user.editHistory[today] = 0
+        user.editHistory[today] += 1
+        user.save()
+
+def get_edit_history(userId, dayCount):
+    user_search_res = userModel.User.objects.raw({'_id': userId})
+    editHistory = {}
+    if (user_search_res.count() > 0):
+        user = user_search_res.first()
+        curDate = datetime.today()
+        for i in range(dayCount):
+            dateStr = curDate.strftime('%Y-%m-%d')                        
+            if (dateStr in user.editHistory):
+                editHistory[dateStr] = user.editHistory[dateStr]
+            else:
+                editHistory[dateStr] = 0
+            curDate = curDate - timedelta(days=1)            
+    return editHistory
+
+
