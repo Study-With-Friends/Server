@@ -19,32 +19,32 @@ def user_loader(user_id):
         user.id = user_res.id
         user.data = {
             "id": user_res.id,
-            "email": user_res.email,
+            "username": user_res.username,
             "name": user_res.name          
         }
         return user
 
-def register_user(name, email, password):
-    user_search_res = userModel.User.objects.raw({'email': email})
+def register_user(name, username, password):
+    user_search_res = userModel.User.objects.raw({'username': username})
     if (user_search_res.count() != 0):
-        return "A user with that email already exists.", 400
+        return "A user with that username already exists.", 400
     user_id = shortuuid.uuid()
     print(name)
-    print(email)
+    print(username)
     print(password)
     user = userModel.User(
         id=user_id,
         name=name,
-        email=email,
+        username=username,
         password=password
     ).save()
     user_obj = makeSerializable(user.to_son().to_dict())
     return user_obj
 
-def validate_user(email, password):
-    if (email is None or password is None):
+def validate_user(username, password):
+    if (username is None or password is None):
         return None, None
-    user_search_res = userModel.User.objects.raw({'email': email})
+    user_search_res = userModel.User.objects.raw({'username': username})
     if (user_search_res.count() == 0):
         return None, None
     else:

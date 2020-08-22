@@ -18,7 +18,7 @@ class CurUserRegister(Resource):
     def post(self):
          parser = reqparse.RequestParser()
          parser.add_argument('name', type=str, required=True)
-         parser.add_argument('email', type=str, required=True)
+         parser.add_argument('username', type=str, required=True)
          parser.add_argument('password', type=str, required=True)
          return userController.register_user(**parser.parse_args())
 
@@ -27,7 +27,7 @@ class CurUserRegister(Resource):
 class CurUserLogin(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('email', type=str, required=True)
+        parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         user_res = userController.validate_user(**parser.parse_args())
         if (user_res[0]):
@@ -49,14 +49,14 @@ class CurUserLogout(Resource):
 class FileUpload(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('email', type=str, required=True)
+        parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         parser.add_argument('fileId', type=str, required=True)
         parser.add_argument('file', location='files', type=FileStorage, required=True)
         args = parser.parse_args()
-        print(args['email'])
+        print(args['username'])
         print(args['password'])
-        user_res = userController.validate_user(args['email'], args['password'])
+        user_res = userController.validate_user(args['username'], args['password'])
         if (user_res[0] is None):
             return "Wrong login.", 403
 
