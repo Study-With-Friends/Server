@@ -63,6 +63,14 @@ class UserProfile(Resource):
             "history": history
         }
 
+@api.route('/activity')
+class Activity(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('dayCount', type=int, required=True)
+        args = parser.parse_args()
+        return userController.get_activity(None, args['dayCount'])
+
 @api.route('/user/follow')
 class UserFollow(Resource):
     @flask_login.login_required
@@ -71,7 +79,6 @@ class UserFollow(Resource):
         parser.add_argument('username', type=str, required=True)
         args = parser.parse_args()     
         return userController.follow_user(flask_login.current_user, args['username'])
-
 @api.route('/user/unfollow')
 class UserUnfollow(Resource):
     @flask_login.login_required

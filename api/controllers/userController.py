@@ -57,7 +57,7 @@ def validate_user(username, password):
 
 def get_all_users():
     users = []
-    users_search_res = userModel.User.objects.objects.raw({})
+    users_search_res = userModel.User.objects.raw({})
     query_set = list(users_search_res)
     for user in query_set:
         users.append(makeSerializable(user.to_son().to_dict()))
@@ -106,7 +106,7 @@ def get_edit_history(username, dayCount):
     return editHistory
 
 def get_activity(username, dayCount):
-    user_search_res = userModel.User.objects.raw({'username': username})
+    user_search_res = userModel.User.objects.raw({'username': username} if username else {})
     activity = {}
     if (user_search_res.count() > 0):
         user = user_search_res.first()
