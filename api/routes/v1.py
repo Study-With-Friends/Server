@@ -54,6 +54,13 @@ class CurUserLogout(Resource):
         parser.add_argument('dayCount', type=int, required=True)        
         return userController.get_edit_history(**parser.parse_args())
 
+@api.route('/users')
+class AllUsers(Resource):
+    @flask_login.login_required
+    def get(self):
+        parser = reqparse.RequestParser()
+        return userController.get_all_users(**parser.parse_args())
+
 @api.route('/files/upload')
 class FileUpload(Resource):
     def post(self):
