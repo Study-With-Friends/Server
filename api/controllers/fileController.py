@@ -7,6 +7,7 @@ from api.models import fileModel
 from api.utils.api import makeSerializable
 
 def upload_file(user, fileId, fileObj):
+    displayName = secure_filename(fileObj.filename)
     fileName = user['id'] + '-' + fileId
     file_search_res = fileModel.File.objects.raw({'name': fileName})
     if (file_search_res.count() == 0):
@@ -15,7 +16,7 @@ def upload_file(user, fileId, fileObj):
             name=fileName,
             owner=user['id'],
             lastModified=datetime.now(),
-            displayName= fileDisplayName
+            displayName=displayName
         ).save()
     else:
         file = file_search_res.first()
