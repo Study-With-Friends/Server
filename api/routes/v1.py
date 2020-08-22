@@ -50,7 +50,7 @@ class CurUserLogout(Resource):
     @flask_login.login_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('userId', type=str, required=True)
+        parser.add_argument('username', type=str, required=True)
         return userController.get_user_profile(**parser.parse_args())
 
 

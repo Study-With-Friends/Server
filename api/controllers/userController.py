@@ -72,8 +72,8 @@ def add_edit(userId):
         user.editHistory[today] += 1
         user.save()
 
-def get_user_profile(userId):
-    user_search_res = userModel.User.objects.raw({'_id': userId})
+def get_user_profile(username):
+    user_search_res = userModel.User.objects.raw({'username': username})
     if (user_search_res.count() == 0):
         return None
     else:
