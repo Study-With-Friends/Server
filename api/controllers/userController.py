@@ -26,7 +26,7 @@ def user_loader(user_id):
         }
         return user
 
-def register_user(name, username, password):
+def register_user(name, username, password, school, location):
     user_search_res = userModel.User.objects.raw({'username': username})
     if (user_search_res.count() != 0):
         return "A user with that username already exists.", 400
@@ -36,6 +36,8 @@ def register_user(name, username, password):
         name=name,
         username=username,
         password=password,
+        school=school,
+        location=location,
         editHistory={},
         followingList = [],
         followerList = []
@@ -98,7 +100,9 @@ def get_user_profile(username):
             "username": user_res.username,
             "name": user_res.name,
             "followingList": following_list,
-            "followerList": follower_list
+            "followerList": follower_list,
+            "location": user_res.location,
+            "school": user_res.school
         }        
 
 def get_edit_history(username, dayCount):

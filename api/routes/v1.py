@@ -20,6 +20,8 @@ class CurUserRegister(Resource):
          parser.add_argument('name', type=str, required=True)
          parser.add_argument('username', type=str, required=True)
          parser.add_argument('password', type=str, required=True)
+         parser.add_argument('school', type=str)
+         parser.add_argument('location', type=str)
          return userController.register_user(**parser.parse_args())
 
 
