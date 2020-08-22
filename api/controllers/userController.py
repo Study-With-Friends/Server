@@ -18,6 +18,7 @@ def user_loader(user_id):
         user = Flask_User()
         user.id = user_res.id
         user.data = {
+            "id": user_res.id,
             "email": user_res.email,
             "name": user_res.name          
         }

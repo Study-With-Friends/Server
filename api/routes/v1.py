@@ -1,11 +1,13 @@
+from api.controllers import fileController
 from flask_restx import Namespace, Resource, reqparse
 import flask_login
 from api.controllers import userController
 from datetime import datetime, timedelta
+from werkzeug.datastructures import FileStorage
 
 api = Namespace('v1', description='V1 API')
 
-@api.route('/user')
+@api.route('/curuser')
 class User(Resource):
     @flask_login.login_required
     def get(self):        
@@ -40,3 +42,38 @@ class CurUserLogout(Resource):
     def post(self):
         flask_login.logout_user()
         return True
+
+@api.route('/files/upload')
+class FileUpload(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('email', type=str, required=True)
+        parser.add_argument('password', type=str, required=True)
+        parser.add_argument('fileId', type=str, required=True)
+        parser.add_argument('file', location='files', type=FileStorage, required=True)
+        args = parser.parse_args()
+        print(args['email'])
+        print(args['password'])
+        user_res = userController.validate_user(args['email'], args['password'])
+        if (user_res[0] is None):
+            return "Wrong login.", 403
+
+        uploaded_file = args['file']
+        fileController.upload_file(user_res[1], args['fileId'], uploaded_file)
+        return user_res[1]
+
+@api.route('/files/get')
+class FileUpload(Resource):
+    @flask_login.login_required
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('fileName', type=str, required=True)        
+        return fileController.get_file(**parser.parse_args())
+
+@api.route('/files/list')
+class FileUpload(Resource):
+    @flask_login.login_required
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('userId', type=str, required=True)        
+        return fileController.get_user_file_list(**parser.parse_args())
