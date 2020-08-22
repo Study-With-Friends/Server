@@ -27,6 +27,7 @@ def upload_file(user, fileId, fileObj):
         else:
             file = file_search_res.first()
             file.lastModified = datetime.now()
+            file.name=fileName,
             file.save()
         file_res = makeSerializable(file_search_res.first().to_son().to_dict())
         fileObj.save(os.path.join(UPLOAD_FOLDER, fileName))
