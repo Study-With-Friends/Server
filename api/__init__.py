@@ -19,6 +19,7 @@ connectWithRetry()
 app = Flask(__name__)
 app.secret_key = b'\xa3\xd527\xbdq\x8emv\xb2\xca\xb3,\x81\x1f\xc9'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
+app.config['SESSION_COOKIE_SAMESITE'] = "None"
 
 CORS(app,
      resources={
