@@ -123,24 +123,25 @@ def get_activity(username, dayCount):
     user_search_res = userModel.User.objects.raw({'username': username} if username else {})
     activity = {}
     if (user_search_res.count() > 0):
-        user = user_search_res.first()
-        curDate = datetime.today()
-        for i in range(dayCount):
-            dateStr = curDate.strftime('%Y-%m-%d')                        
-            if (dateStr in user.editHistory):
-                activity[dateStr] = []
-                for file in user.editHistory[dateStr]:
-                    fileData = fileController.get_file_data(file)                    
-                    activity[dateStr].append({
-                        "username": user.username,
-                        "fileName": file,
-                        "fileDisplayName": fileData['displayName'] if fileData is not None else '',
-                        "edits": user.editHistory[dateStr][file],
-                        "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr if fileData is not None else ''
-                    })
-            else:
-                activity[dateStr] = []
-            curDate = curDate - timedelta(days=1)            
+        user_set = list(user_search_res)
+        for user in user_set:
+            curDate = datetime.today()
+            for i in range(dayCount):
+                dateStr = curDate.strftime('%Y-%m-%d')                        
+                if (dateStr in user.editHistory):
+                    activity[dateStr] = []
+                    for file in user.editHistory[dateStr]:
+                        fileData = fileController.get_file_data(file)                    
+                        activity[dateStr].append({
+                            "username": user.username,
+                            "fileName": file,
+                            "fileDisplayName": fileData['displayName'] if fileData is not None else '',
+                            "edits": user.editHistory[dateStr][file],
+                            "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr if fileData is not None else ''
+                        })
+                else:
+                    activity[dateStr] = []
+                curDate = curDate - timedelta(days=1)            
     return activity
 
 def follow_user(user, followUsername):
