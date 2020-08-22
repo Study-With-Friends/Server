@@ -7,7 +7,7 @@ def makeSerializable(obj):
         if (not k.startswith('_')):
             if (type(v) is datetime.datetime):
                 serialObj[k] = str(v)
-            else:
+            elif (k != 'password'):
                 serialObj[k] = v
         elif (k == '_id'):
             serialObj['id'] = v

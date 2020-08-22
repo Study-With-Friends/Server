@@ -71,8 +71,8 @@ def add_edit(userId, fileName):
         if (today not in user.editHistory):
             user.editHistory[today] = {}
         if (fileName not in user.editHistory[today]):
-            user.editHistory[today][fileName] = 0
-        user.editHistory[today][fileName] += 1
+            user.editHistory[today][fileName] = []
+        user.editHistory[today][fileName].append(str(datetime.now()))
         user.save()
 
 def get_user_profile(username):
@@ -96,7 +96,10 @@ def get_edit_history(username, dayCount):
         for i in range(dayCount):
             dateStr = curDate.strftime('%Y-%m-%d')                        
             if (dateStr in user.editHistory):
-                editHistory[dateStr] = sum(user.editHistory[dateStr].values())
+                totalEdits = 0
+                for file in user.editHistory[dateStr]:
+                    totalEdits += len(user.editHistory[dateStr][file])
+                editHistory[dateStr] = totalEdits
             else:
                 editHistory[dateStr] = 0
             curDate = curDate - timedelta(days=1)            
@@ -116,11 +119,19 @@ def get_activity(username, dayCount):
                     fileData = fileController.get_file_data(file)                    
                     activity[dateStr].append({
                         "fileName": file,
-                        "fileDisplayName": fileData['displayName'],
+                        "fileDisplayName": fileData['displayName'] if fileData is not None else '',
                         "edits": user.editHistory[dateStr][file],
-                        "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr
+                        "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr if fileData is not None else ''
                     })
             else:
                 activity[dateStr] = []
             curDate = curDate - timedelta(days=1)            
     return activity
+
+def follow_user(user, followUsername):
+    user_search_res = userModel.User.objects.raw({'username': user['username']})
+    user_follow_search_res = userModel.User.objects.raw({'username': followUsername})    
+
+def unfollow_user(user, unfollowUsername):
+    user_search_res = userModel.User.objects.raw({'username': user['username']})
+    user_unfollow_search_res = userModel.User.objects.raw({'username': unfollowUsername})    
