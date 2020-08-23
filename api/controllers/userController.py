@@ -5,6 +5,7 @@ from api.models import userModel, activityModel, fileModel
 from api.utils.api import makeSerializable
 from datetime import datetime, timedelta
 from random import randint
+import pymongo
 
 login_manager = flask_login.LoginManager()
 
@@ -138,8 +139,9 @@ def get_edit_history(username, dayCount):
 def get_activity(username, dayCount):
 
     activities = {}
+    edits_for_file = {}
     lower_time_bound = datetime.today() - timedelta(days=dayCount)
-    activities_search_res = activityModel.Activity.objects.raw({'timestamp' : {'$gte': lower_time_bound }})
+    activities_search_res = activityModel.Activity.objects.raw({'timestamp' : {'$gte': lower_time_bound }}).aggregate({'$sort': {'timestamp': pymongo.DESCENDING}})
 
     owner_cache = {}
     file_cache = {}
@@ -147,25 +149,31 @@ def get_activity(username, dayCount):
     query_set = list(activities_search_res)
     for activity in query_set:
         start_time = datetime.now().timestamp()
-        formatted = activity.timestamp.strftime('%Y-%m-%d')
+        formatted = activity['timestamp'].strftime('%Y-%m-%d')
 
         if formatted not in activities:
             activities[formatted] = []
 
-        new_activity = makeSerializable(activity.to_son().to_dict())
+        new_activity = makeSerializable(activity)
 
         if (new_activity['owner'] not in owner_cache):
             owner_cache[new_activity['owner']] = makeSerializable(userModel.User.objects.raw({'_id': new_activity['owner']}).first().to_son().to_dict())
         
-        new_activity['owner'] = owner_cache[new_activity['owner']]
+        owner = owner_cache[new_activity['owner']]
+        new_activity['owner'] = owner
 
         if (new_activity['file'] not in file_cache):
             file_cache[new_activity['file']] = makeSerializable(fileModel.File.objects.raw({'_id': new_activity['file']}).first().to_son().to_dict())
 
-        new_activity['file'] = file_cache[new_activity['file']]
+        file = file_cache[new_activity['file']]
+        new_activity['file'] = file
 
-        activities[formatted].append(new_activity)
-
+        if file['name'] not in edits_for_file:
+            activities[formatted].append(new_activity)
+            edits_for_file[file['name']] = {}
+        if formatted not in edits_for_file[file['name']]:
+            edits_for_file[file['name']][formatted] = 0
+        edits_for_file[file['name']][formatted] += 1
 
     return activities
 
