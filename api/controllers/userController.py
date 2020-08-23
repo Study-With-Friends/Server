@@ -1,6 +1,7 @@
 from api.controllers import fileController, activityController
 import flask_login
 import shortuuid
+from werkzeug.security import generate_password_hash, check_password_hash
 from api.models import userModel, activityModel, fileModel
 from api.utils.api import makeSerializable
 from datetime import datetime, timedelta
@@ -62,7 +63,7 @@ def register_user(name, username, password, school, location):
         avatar="/pf/" + str(randint(1, 100)) + ".jpg",
         name=name,
         username=username,
-        password=password,
+        password=generate_password_hash(password),
         school=school,
         location=location,
         followingList = [],
@@ -79,7 +80,7 @@ def validate_user(username, password):
         return None, None
     else:
         user_res = user_search_res.first()
-        if (password == user_res.password):
+        if (check_password_hash(password, user_res.password)):
             user = Flask_User()
             user.id = user_res.id          
             return user, makeSerializable(user_res.to_son().to_dict())
