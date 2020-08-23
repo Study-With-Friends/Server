@@ -1,4 +1,5 @@
 __all__ = [
     "userModel",
-    "fileModel"
+    "fileModel",
+    "activityModel"
 ]

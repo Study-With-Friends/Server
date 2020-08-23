@@ -4,21 +4,24 @@ import os
 import shortuuid
 from werkzeug.utils import secure_filename
 from credentials import UPLOAD_FOLDER
-from api.models import fileModel
+from api.models import fileModel, activityModel
 from api.utils.api import makeSerializable
+from api.controllers import activityController
 
 def upload_file(user, fileId, fileObj, action):
-    print(action)
     file_res = None
     if (fileId is None):
         fileId = "__TEST_ID__"
     fileName = user['id'] + '-' + fileId
+    
+    generated_id = shortuuid.uuid()
+
     if (fileObj is not None or action == 'deleted'):
         displayName = secure_filename(fileObj.filename)        
         file_search_res = fileModel.File.objects.raw({'name': fileName})        
         if (file_search_res.count() == 0 and action != 'deleted'):
             file = fileModel.File(
-                id=shortuuid.uuid(),
+                id=generated_id,
                 name=fileName,
                 owner=user['id'],
                 lastModified=datetime.now(),
@@ -34,10 +37,10 @@ def upload_file(user, fileId, fileObj, action):
             file.lastModified = datetime.now()
             file.name=fileName,
             file.save()
-        
+        activityController.new_activity(user['id'], action, file)
         file_res = makeSerializable(file.to_son().to_dict())
         fileObj.save(os.path.join(UPLOAD_FOLDER, fileName))
-    userController.add_edit(user['id'], fileName)
+
     return file_res
 
 def get_user_file_list(userId):

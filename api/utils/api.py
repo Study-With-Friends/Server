@@ -4,6 +4,9 @@ import simplejson as json
 def makeSerializable(obj):
     serialObj = {}
     for k, v in obj.items():        
+        if isinstance(v, dict):
+            serialObj[k] = makeSerializable(v)
+            continue
         if (not k.startswith('_')):
             if (type(v) is datetime.datetime):
                 serialObj[k] = str(v)

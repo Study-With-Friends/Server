@@ -56,12 +56,13 @@ class UserProfile(Resource):
         args = parser.parse_args()
         profile = userController.get_user_profile(args['username'])
         history = userController.get_edit_history(args['username'], args['dayCount'])
-        activity = userController.get_activity(args['username'], args['dayCount'])
+        # activity = userController.get_activity(args['username'], args['dayCount'])
         file_list = fileController.get_user_file_list(profile['id'] if profile is not None else '')
+        
         return {
             "profile": profile,
             "file_list": file_list,
-            "activity": activity,
+            # "activity": activity,
             "history": history
         }
 
@@ -117,6 +118,7 @@ class AllUsers(Resource):
 class FileUpload(Resource):
     def post(self):
         parser = reqparse.RequestParser()
+        parser.add_argument('action', type=str, required=True)
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         parser.add_argument('fileId', type=str, required=True)

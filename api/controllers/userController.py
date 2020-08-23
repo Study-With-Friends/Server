@@ -1,7 +1,7 @@
-from api.controllers import fileController
+from api.controllers import fileController, activityController
 import flask_login
 import shortuuid
-from api.models import userModel
+from api.models import userModel, activityModel, fileModel
 from api.utils.api import makeSerializable
 from datetime import datetime, timedelta
 from random import randint
@@ -27,6 +27,24 @@ def user_loader(user_id):
         }
         return user
 
+def _get_user(user_id):
+    user_search_res = userModel.User.objects.raw(
+        {'_id': user_id})
+    if (user_search_res.count() == 0):
+        return None
+    else:
+        user = user_search_res.first()
+        return user
+
+def _get_file(file_id):
+    file_search_res = fileModel.File.objects.raw(
+        {'_id': file_id})
+    if (file_search_res.count() == 0):
+        return None
+    else:
+        file = file_search_res.first()
+        return file
+
 def register_user(name, username, password, school, location):
     user_search_res = userModel.User.objects.raw({'username': username})
     if (user_search_res.count() != 0):
@@ -40,7 +58,6 @@ def register_user(name, username, password, school, location):
         password=password,
         school=school,
         location=location,
-        editHistory={},
         followingList = [],
         followerList = []
     ).save()
@@ -68,18 +85,6 @@ def get_all_users():
     for user in query_set:
         users.append(makeSerializable(user.to_son().to_dict()))
     return users, 200
-
-def add_edit(userId, fileName):
-    user_search_res = userModel.User.objects.raw({'_id': userId})
-    if (user_search_res.count() > 0):
-        today = datetime.today().strftime('%Y-%m-%d')
-        user = user_search_res.first()
-        if (today not in user.editHistory):
-            user.editHistory[today] = {}
-        if (fileName not in user.editHistory[today]):
-            user.editHistory[today][fileName] = []
-        user.editHistory[today][fileName].append(str(datetime.now()))
-        user.save()
 
 def get_user_profile(username):
     user_search_res = userModel.User.objects.raw({'username': username})
@@ -109,47 +114,30 @@ def get_user_profile(username):
         }        
 
 def get_edit_history(username, dayCount):
-    user_search_res = userModel.User.objects.raw({'username': username})
     editHistory = {}
-    if (user_search_res.count() > 0):
-        user = user_search_res.first()
-        curDate = datetime.today()
-        for i in range(dayCount):
-            dateStr = curDate.strftime('%Y-%m-%d')                        
-            if (dateStr in user.editHistory):
-                totalEdits = 0
-                for file in user.editHistory[dateStr]:
-                    totalEdits += len(user.editHistory[dateStr][file])
-                editHistory[dateStr] = totalEdits
-            else:
-                editHistory[dateStr] = 0
-            curDate = curDate - timedelta(days=1)            
+    lower_time_bound = datetime.today() - timedelta(days=dayCount)
+    user_search_res = userModel.User.objects.raw({ 'username': username })
+    if (user_search_res.count() == 0):
+        return editHistory
+    
+    user_id = user_search_res.first().id
+
+    activities_search_res = activityModel.Activity.objects.raw({'owner': user_id, 'timestamp' : {'$gte': lower_time_bound }})
+    query_set = list(activities_search_res)
+    for activity in query_set:
+        formatted = activity.timestamp.strftime('%Y-%m-%d')
+        editHistory[formatted] = editHistory.get(formatted, 0) + 1       
     return editHistory
 
 def get_activity(username, dayCount):
-    user_search_res = userModel.User.objects.raw({'username': username} if username else {})
-    activity = {}
-    if (user_search_res.count() > 0):
-        user_set = list(user_search_res)
-        for user in user_set:
-            curDate = datetime.today()
-            for i in range(dayCount):
-                dateStr = curDate.strftime('%Y-%m-%d')                        
-                if (dateStr not in activity):
-                    activity[dateStr] = []
-                if (dateStr in user.editHistory):                    
-                    for file in user.editHistory[dateStr]:
-                        fileData = fileController.get_file_data(file)                    
-                        activity[dateStr].append({
-                            "username": user.username,
-                            "avatar": user.avatar,
-                            "fileName": file,
-                            "fileDisplayName": fileData['displayName'] if fileData is not None else '',
-                            "edits": user.editHistory[dateStr][file],
-                            "createdToday": datetime.strptime(fileData['creationDate'], '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') == dateStr if fileData is not None else ''
-                        })            
-                curDate = curDate - timedelta(days=1)            
-    return activity
+    activities = {}
+    lower_time_bound = datetime.today() - timedelta(days=dayCount)
+    activities_search_res = activityModel.Activity.objects.raw({'timestamp' : {'$gte': lower_time_bound }})
+    query_set = list(activities_search_res)
+    for activity in query_set:
+        formatted = activity.timestamp.strftime('%Y-%m-%d')
+        activities[formatted] = makeSerializable(activity.to_son().to_dict())
+    return activities
 
 def follow_user(user, followUsername):
     if (followUsername == user.data['username']):

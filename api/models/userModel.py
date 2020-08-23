@@ -7,7 +7,6 @@ class User(MongoModel):
     avatar = fields.URLField(required=True)
     name = fields.CharField(required=True)
     password = fields.CharField(required=True)
-    editHistory = fields.DictField(required=True, default={}, blank=True)
     username = fields.CharField(required=True)
     school = fields.CharField(blank=True)
     location = fields.CharField(blank=True)
