@@ -7,11 +7,17 @@ from werkzeug.datastructures import FileStorage
 
 api = Namespace('v1', description='V1 API')
 
+# @api.route('/curuser')
+# class User(Resource):
+#     @flask_login.login_required
+#     def get(self):
+#         return flask_login.current_user.data
+
 @api.route('/curuser')
 class User(Resource):
     @flask_login.login_required
-    def get(self):        
-        return flask_login.current_user.data
+    def get(self):
+        return userController.get_user(flask_login.current_user)
 
 @api.route('/curuser/register')
 class CurUserRegister(Resource):
@@ -88,7 +94,7 @@ class UserUnfollow(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
-        args = parser.parse_args()     
+        args = parser.parse_args()
         return userController.unfollow_user(flask_login.current_user, args['username'])
 
 @api.route('/user/history')

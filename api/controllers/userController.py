@@ -45,6 +45,12 @@ def _get_file(file_id):
         file = file_search_res.first()
         return file
 
+def get_user(user):
+    user = _get_user(user.id)
+    if not user:
+        return None
+    return makeSerializable(user.to_son().to_dict())
+
 def register_user(name, username, password, school, location):
     user_search_res = userModel.User.objects.raw({'username': username})
     if (user_search_res.count() != 0):
