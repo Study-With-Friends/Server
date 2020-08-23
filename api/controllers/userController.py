@@ -80,7 +80,7 @@ def validate_user(username, password):
         return None, None
     else:
         user_res = user_search_res.first()
-        if (check_password_hash(password, user_res.password)):
+        if (check_password_hash(user_res.password, password)):
             user = Flask_User()
             user.id = user_res.id          
             return user, makeSerializable(user_res.to_son().to_dict())
