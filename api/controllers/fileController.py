@@ -7,15 +7,16 @@ from credentials import UPLOAD_FOLDER
 from api.models import fileModel
 from api.utils.api import makeSerializable
 
-def upload_file(user, fileId, fileObj):
+def upload_file(user, fileId, fileObj, action):
+    print(action)
     file_res = None
     if (fileId is None):
         fileId = "__TEST_ID__"
     fileName = user['id'] + '-' + fileId
-    if (fileObj is not None):
+    if (fileObj is not None or action == 'deleted'):
         displayName = secure_filename(fileObj.filename)        
-        file_search_res = fileModel.File.objects.raw({'name': fileName})
-        if (file_search_res.count() == 0):
+        file_search_res = fileModel.File.objects.raw({'name': fileName})        
+        if (file_search_res.count() == 0 and action != 'deleted'):
             file = fileModel.File(
                 id=shortuuid.uuid(),
                 name=fileName,
@@ -24,11 +25,16 @@ def upload_file(user, fileId, fileObj):
                 displayName=displayName,
                 creationDate=datetime.now()
             )
+            file.save()
+        elif (action == 'deleted'):
+            file = file_search_res.first()
+            file.delete()
         else:
             file = file_search_res.first()
             file.lastModified = datetime.now()
             file.name=fileName,
-        file.save()
+            file.save()
+        
         file_res = makeSerializable(file.to_son().to_dict())
         fileObj.save(os.path.join(UPLOAD_FOLDER, fileName))
     userController.add_edit(user['id'], fileName)

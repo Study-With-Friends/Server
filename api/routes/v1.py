@@ -120,16 +120,15 @@ class FileUpload(Resource):
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         parser.add_argument('fileId', type=str, required=True)
+        parser.add_argument('action', type=str, required=True)
         parser.add_argument('file', location='files', type=FileStorage)
         args = parser.parse_args()
-        print(args['username'])
-        print(args['password'])
         user_res = userController.validate_user(args['username'], args['password'])
         if (user_res[0] is None):
             return "Wrong login.", 403
 
         uploaded_file = args['file']
-        fileController.upload_file(user_res[1], args['fileId'], uploaded_file)
+        fileController.upload_file(user_res[1], args['fileId'], uploaded_file, args['action'])
         return user_res[1]
 
 @api.route('/files/get')
