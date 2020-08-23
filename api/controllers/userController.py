@@ -130,21 +130,36 @@ def get_edit_history(username, dayCount):
     return editHistory
 
 def get_activity(username, dayCount):
+
     activities = {}
     lower_time_bound = datetime.today() - timedelta(days=dayCount)
     activities_search_res = activityModel.Activity.objects.raw({'timestamp' : {'$gte': lower_time_bound }})
+
+    owner_cache = {}
+    file_cache = {}
+        
     query_set = list(activities_search_res)
     for activity in query_set:
+        start_time = datetime.now().timestamp()
         formatted = activity.timestamp.strftime('%Y-%m-%d')
 
         if formatted not in activities:
             activities[formatted] = []
 
         new_activity = makeSerializable(activity.to_son().to_dict())
-        new_activity['owner'] = makeSerializable(activity.owner.to_son().to_dict())
-        new_activity['file'] = makeSerializable(activity.file.to_son().to_dict())
+
+        if (new_activity['owner'] not in owner_cache):
+            owner_cache[new_activity['owner']] = makeSerializable(userModel.User.objects.raw({'_id': new_activity['owner']}).first().to_son().to_dict())
+        
+        new_activity['owner'] = owner_cache[new_activity['owner']]
+
+        if (new_activity['file'] not in file_cache):
+            file_cache[new_activity['file']] = makeSerializable(fileModel.File.objects.raw({'_id': new_activity['file']}).first().to_son().to_dict())
+
+        new_activity['file'] = file_cache[new_activity['file']]
 
         activities[formatted].append(new_activity)
+
 
     return activities
 
