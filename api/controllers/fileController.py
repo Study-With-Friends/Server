@@ -17,7 +17,7 @@ def upload_file(user, fileId, fileObj, action):
     generated_id = shortuuid.uuid()
 
     if (fileObj is not None or action == 'deleted'):
-        displayName = secure_filename(fileObj.filename)        
+        displayName = secure_filename(fileObj.filename)    
         file_search_res = fileModel.File.objects.raw({'name': fileName})        
         if (file_search_res.count() == 0 and action != 'deleted'):
             file = fileModel.File(
@@ -35,7 +35,7 @@ def upload_file(user, fileId, fileObj, action):
         else:
             file = file_search_res.first()
             file.lastModified = datetime.now()
-            file.name=fileName,
+            file.name = fileName
             file.save()
         activityController.new_activity(user['id'], action, file)
         file_res = makeSerializable(file.to_son().to_dict())
