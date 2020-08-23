@@ -136,7 +136,16 @@ def get_activity(username, dayCount):
     query_set = list(activities_search_res)
     for activity in query_set:
         formatted = activity.timestamp.strftime('%Y-%m-%d')
-        activities[formatted] = makeSerializable(activity.to_son().to_dict())
+
+        if formatted not in activities:
+            activities[formatted] = []
+
+        new_activity = makeSerializable(activity.to_son().to_dict())
+        new_activity['owner'] = makeSerializable(activity.owner.to_son().to_dict())
+        new_activity['file'] = makeSerializable(activity.file.to_son().to_dict())
+
+        activities[formatted].append(new_activity)
+
     return activities
 
 def follow_user(user, followUsername):
