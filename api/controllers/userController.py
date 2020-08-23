@@ -171,11 +171,15 @@ def get_activity(username, dayCount):
         if file['name'] not in edits_for_file:
             activities[formatted].append(new_activity)
             edits_for_file[file['name']] = {}
-        if formatted not in edits_for_file[file['name']]:
-            edits_for_file[file['name']][formatted] = 0
-        edits_for_file[file['name']][formatted] += 1
+            curDate = datetime.today()
+            for i in range(dayCount):
+                dateStr = curDate.strftime('%Y-%m-%d')
+                edits_for_file[file['name']][dateStr] = 0
+                curDate = curDate - timedelta(days=1)
+        if formatted in edits_for_file[file['name']]:
+            edits_for_file[file['name']][formatted] += 1
 
-    return activities
+    return {"activities": activities, "edits_for_file": edits_for_file}
 
 def follow_user(user, followUsername):
     if (followUsername == user.data['username']):
