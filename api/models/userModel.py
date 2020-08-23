@@ -4,7 +4,7 @@ class User(MongoModel):
     pass
 class User(MongoModel):
     id = fields.CharField(required=True, primary_key=True)
-    avatar = fields.URLField(required=True)
+    avatar = fields.CharField(required=True)
     name = fields.CharField(required=True)
     password = fields.CharField(required=True)
     username = fields.CharField(required=True)
